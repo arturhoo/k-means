@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from utils import get_content_from_file
-from random import randint, random
-from pprint import pprint
+from random import random
 
 
 class Point(object):
@@ -39,12 +38,19 @@ def get_set_of_tags_from_file(file_name):
     return tags
 
 
-def get_associated_point(list_of_tags, observation):
-    return [1 if tag in observation else 0 for tag in list_of_tags]
+def calculate_total_squared_distance(clusters, best_matches, musics):
+    total_squared_distace = 0.0
+    for i, match in enumerate(best_matches):
+        for matched_music in match:
+            cluster_point = Point()
+            cluster_point.vector = clusters[i]
+            d = matched_music.point.euclidean_distance(cluster_point)
+            total_squared_distace += d
+    print 'Total distance:', total_squared_distace
 
 
 if __name__ == '__main__':
-    file_name = 'data/lfm.dat'
+    file_name = 'data/lfm_short.dat'
     k = 5
     musics = []
     tags = get_set_of_tags_from_file(file_name)
@@ -58,13 +64,13 @@ if __name__ == '__main__':
         music.set_point(list_of_all_tags)
         musics.append(music)
 
-    # rand_bin_list = lambda n: [randint(0, 1) for b in range(1, n + 1)]
     rand_bin_list = lambda n: [random() for b in range(1, n + 1)]
     clusters = [rand_bin_list(len(list_of_all_tags)) for i in range(k)]
 
     last_matches = None
     for t in range(100):
         print 'Iteration', t
+        total_squared_distace = 0.0
         best_matches = [[] for i in range(k)]
 
         # find which centroid is the closest for each music
@@ -79,6 +85,7 @@ if __name__ == '__main__':
                     best_match = i
                     best_match_distance = d
             best_matches[best_match].append(music)
+            total_squared_distace += best_match_distance
 
         # if the results are the same as last time, this is complete
         if best_matches == last_matches:
@@ -97,3 +104,4 @@ if __name__ == '__main__':
 
         for i, match in enumerate(best_matches):
             print i, len(match)
+        print 'Total distance:', total_squared_distace
