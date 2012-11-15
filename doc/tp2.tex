@@ -1,0 +1,90 @@
+\documentclass[12pt]{article}
+\usepackage{sbc-template}
+\usepackage{graphicx}
+\usepackage[lofdepth,lotdepth]{subfig}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{wrapfig}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{times,amsmath,epsfig}
+\usepackage{url}
+\usepackage{multirow}
+ \makeatletter
+ \newif\if@restonecol
+ \makeatother
+ \let\algorithm\relax
+ \let\endalgorithm\relax
+\usepackage{listings}
+\usepackage{float}
+\usepackage[lined,algonl,ruled]{algorithm2e}
+\usepackage{multirow}
+\usepackage[brazil]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{enumitem}
+
+
+
+% \setlist{nolistsep}
+
+\sloppy
+
+\title{Mineração de Dados: Trabalho Prático 2}
+
+\author{Artur Rodrigues}
+
+\address{Departamento de Ciência da Computação \\ Universidade Federal de Minas Gerais (UFMG)
+    \email{artur@dcc.ufmg.br}
+}
+
+\begin{document}
+
+\maketitle
+
+\section{INTRODUÇÃO}
+
+
+\section{K-MEANS}
+
+
+\subsection{Complexidade}
+
+
+\section{ESCOLHA DOS CENTRÓIDES INICIAIS}
+
+K random initial centroids
+Forgy initialization - randomly chooses K observations from the data set
+Random Partition - randomly assign a cluster to each observation and then proceeds to the Update step
+
+
+\section{BASE DE DADOS}
+
+
+\section{AVALIAÇÃO EXPERIMENTAL}
+
+\subsection{Procedimentos}
+
+Com o intuito de se obter testes mais consistentes, os experimentos foram executados em ambiente virtualizado, com capacidade de processamento e memória primária reduzidas, 50\% da capacidade da máquina hospedeira e 1024MiB, respectivamente. O sistema operacional do ambiente virtualizado era Ubuntu Server 12.04 64 bits e os softwares utilizados foram interpretador Python (2.7.2) PyPy versão 1.9.0, e GCC versão 4.2.1. A máquina hospedeira possuía sistema operacional Mac OS X 10.8.2, processador \textit{quad-core} de 2.3GHz e memória primária com capacidade de 16GiB.
+
+Todos os testes foram realizados 5 vezes e o resultado médio para o tempo de execução foi considerado. Finalmente, certificou-se que a solução desenvolvida execute perfeitamente na estação \verb+claro.grad.dcc.ufmg.br+.
+
+
+\subsection{Análise do Tamanho da Entrada}
+
+
+\subsection{Análise de Parâmetros}
+
+
+\subsection{Análise da Qualidade da Solução}
+
+Smallest total squared distance
+
+
+\section{CONCLUSÃO}
+
+
+% \nocite{*}
+% \bibliographystyle{sbc}
+% \bibliography{bib}
+
+\end{document}
