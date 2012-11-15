@@ -48,15 +48,6 @@ def get_set_of_tags_from_file(file_name):
     return tags
 
 
-def calculate_total_squared_distance(clusters, best_matches, musics):
-    total_squared_distace = 0.0
-    for i, match in enumerate(best_matches):
-        for matched_music in match:
-            d = matched_music.point.euclidean_distance(clusters[i])
-            total_squared_distace += d
-    print 'Total distance:', total_squared_distace
-
-
 if __name__ == '__main__':
     file_name = 'data/lfm_short.dat'
     k = 5
