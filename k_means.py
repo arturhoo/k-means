@@ -6,13 +6,11 @@ from random import random
 class Point(object):
     # maybe leave the constructor empty and create a method for building the
     # vector from base and instace lists
-    def __init__(self, base_list=None, instance_list=None):
-        if base_list is not None and instance_list is not None:
-            self.vector = [1 if item in instance_list
-                           else 0
-                           for item in base_list]
-        else:
-            self.vector = []
+    def __init__(self, vector=None):
+        self.vector = vector
+
+    def set_associated_vector(self, base_list, instance_list):
+        self.vector = [1 if item in instance_list else 0 for item in base_list]
 
     def euclidean_distance(self, point):
         squares = [(x - y) ** 2 for x, y in zip(self.vector, point.vector)]
@@ -26,7 +24,8 @@ class Music(object):
         self.point = None
 
     def set_point(self, list_of_all_tags):
-        self.point = Point(list_of_all_tags, self.list_of_tags)
+        self.point = Point()
+        self.point.set_associated_vector(list_of_all_tags, self.list_of_tags)
 
 
 def get_set_of_tags_from_file(file_name):
@@ -42,9 +41,7 @@ def calculate_total_squared_distance(clusters, best_matches, musics):
     total_squared_distace = 0.0
     for i, match in enumerate(best_matches):
         for matched_music in match:
-            cluster_point = Point()
-            cluster_point.vector = clusters[i]
-            d = matched_music.point.euclidean_distance(cluster_point)
+            d = matched_music.point.euclidean_distance(clusters[i])
             total_squared_distace += d
     print 'Total distance:', total_squared_distace
 
@@ -65,7 +62,7 @@ if __name__ == '__main__':
         musics.append(music)
 
     rand_bin_list = lambda n: [random() for b in range(1, n + 1)]
-    clusters = [rand_bin_list(len(list_of_all_tags)) for i in range(k)]
+    clusters = [Point(rand_bin_list(len(list_of_all_tags))) for i in range(k)]
 
     last_matches = None
     for t in range(100):
@@ -78,9 +75,7 @@ if __name__ == '__main__':
             best_match = -1
             best_match_distance = float("inf")
             for i, cluster in enumerate(clusters):
-                cluster_point = Point()
-                cluster_point.vector = cluster
-                d = music.point.euclidean_distance(cluster_point)
+                d = music.point.euclidean_distance(cluster)
                 if d < best_match_distance:
                     best_match = i
                     best_match_distance = d
@@ -100,7 +95,7 @@ if __name__ == '__main__':
                 list_of_points = [music.point.vector for music in best_matches[i]]
                 sum_of_points = [sum(value) for value in zip(*list_of_points)]
                 averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
-            clusters[i] = averages
+            clusters[i] = Point(averages)
 
         for i, match in enumerate(best_matches):
             print i, len(match)
