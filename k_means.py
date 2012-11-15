@@ -27,6 +27,17 @@ class Music(object):
         self.point = Point()
         self.point.set_associated_vector(list_of_all_tags, self.list_of_tags)
 
+    def find_closest_centroid(self, clusters, best_matches):
+        best_match = -1
+        best_match_distance = float("inf")
+        for i, cluster in enumerate(clusters):
+            d = music.point.euclidean_distance(cluster)
+            if d < best_match_distance:
+                best_match = i
+                best_match_distance = d
+        best_matches[best_match].append(music)
+        return best_match_distance
+
 
 def get_set_of_tags_from_file(file_name):
     content = get_content_from_file(file_name)
@@ -65,21 +76,24 @@ if __name__ == '__main__':
     clusters = [Point(rand_bin_list(len(list_of_all_tags))) for i in range(k)]
 
     last_matches = None
-    for t in range(100):
-        print 'Iteration', t
+    iteration = 1
+    while True:
+        print 'Iteration', iteration
         total_squared_distace = 0.0
         best_matches = [[] for i in range(k)]
 
         # find which centroid is the closest for each music
         for music in musics:
-            best_match = -1
-            best_match_distance = float("inf")
-            for i, cluster in enumerate(clusters):
-                d = music.point.euclidean_distance(cluster)
-                if d < best_match_distance:
-                    best_match = i
-                    best_match_distance = d
-            best_matches[best_match].append(music)
+            # best_match = -1
+            # best_match_distance = float("inf")
+            # for i, cluster in enumerate(clusters):
+            #     d = music.point.euclidean_distance(cluster)
+            #     if d < best_match_distance:
+            #         best_match = i
+            #         best_match_distance = d
+            # best_matches[best_match].append(music)
+            best_match_distance = music.find_closest_centroid(clusters,
+                                                              best_matches)
             total_squared_distace += best_match_distance
 
         # if the results are the same as last time, this is complete
@@ -100,3 +114,5 @@ if __name__ == '__main__':
         for i, match in enumerate(best_matches):
             print i, len(match)
         print 'Total distance:', total_squared_distace
+        print '-----'
+        iteration += 1
