@@ -68,8 +68,9 @@ if __name__ == '__main__':
     clusters = [Point(rand_bin_list(len(list_of_all_tags))) for i in range(k)]
 
     last_matches = None
-    for t in range(100):
-        print 'Iteration', t
+    iteration = 1
+    while True:
+        print 'Iteration', iteration
         total_squared_distace = 0.0
         best_matches = [[] for i in range(k)]
 
@@ -99,3 +100,4 @@ if __name__ == '__main__':
                 sum_of_points = [sum(value) for value in zip(*list_of_points)]
                 averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
             clusters[i] = Point(averages)
+        iteration += 1
