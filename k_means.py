@@ -4,8 +4,6 @@ from random import random
 
 
 class Point(object):
-    # maybe leave the constructor empty and create a method for building the
-    # vector from base and instace lists
     def __init__(self, vector=None):
         self.vector = vector
 
@@ -18,14 +16,28 @@ class Point(object):
 
 
 class Music(object):
-    def __init__(self, id, list_of_tags):
-        self.id = id
+    def __init__(self, mid, list_of_tags):
+        self.mid = mid
         self.list_of_tags = list_of_tags
         self.point = None
+
+    def __repr__(self):
+        return self.mid
 
     def set_point(self, list_of_all_tags):
         self.point = Point()
         self.point.set_associated_vector(list_of_all_tags, self.list_of_tags)
+
+    def find_closest_centroid(self, clusters):
+        best_match = -1
+        best_match_distance = float("inf")
+        for i, cluster in enumerate(clusters):
+            d = self.point.euclidean_distance(cluster)
+            if d < best_match_distance:
+                best_match = i
+                best_match_distance = d
+
+        return best_match, best_match_distance
 
 
 def get_set_of_tags_from_file(file_name):
@@ -63,15 +75,15 @@ if __name__ == '__main__':
 
         # find which centroid is the closest for each music
         for music in musics:
-            best_match = -1
-            best_match_distance = float("inf")
-            for i, cluster in enumerate(clusters):
-                d = music.point.euclidean_distance(cluster)
-                if d < best_match_distance:
-                    best_match = i
-                    best_match_distance = d
+            best_match, best_match_distance = \
+                music.find_closest_centroid(clusters)
             best_matches[best_match].append(music)
             total_squared_distace += best_match_distance
+
+        for i, match in enumerate(best_matches):
+            print i, len(match)
+        print 'Total distance:', total_squared_distace
+        print '-----'
 
         # if the results are the same as last time, this is complete
         if best_matches == last_matches:
@@ -87,7 +99,3 @@ if __name__ == '__main__':
                 sum_of_points = [sum(value) for value in zip(*list_of_points)]
                 averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
             clusters[i] = Point(averages)
-
-        for i, match in enumerate(best_matches):
-            print i, len(match)
-        print 'Total distance:', total_squared_distace
