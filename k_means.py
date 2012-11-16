@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from utils import get_content_from_file
 from random import random
-# from threading import Thread
-# from Queue import Queue
+from hashlib import md5
 from multiprocessing import Process, JoinableQueue, Queue
 
 
@@ -79,7 +78,7 @@ if __name__ == '__main__':
         w.start()
         workers.append(w)
 
-    file_name = 'data/lfm.dat'
+    file_name = 'data/lfm_short.dat'
     k = 5
     musics = []
     tags = get_set_of_tags_from_file(file_name)
@@ -124,7 +123,10 @@ if __name__ == '__main__':
         print 'Total distance:', total_squared_distace
         print '-----'
 
-        if best_matches == last_matches:
+        # Awful fix for a misterious bug, the equality wasn't working
+        h1 = md5(best_matches.__str__()).hexdigest()
+        h2 = md5(last_matches.__str__()).hexdigest()
+        if h1 == h2:
             break
         last_matches = best_matches
 
