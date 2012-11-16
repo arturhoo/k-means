@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from utils import get_content_from_file
 from random import random
-from threading import Thread
-from Queue import Queue
+# from threading import Thread
+# from Queue import Queue
+from multiprocessing import Process, JoinableQueue, Queue
 
 
 class Point(object):
@@ -20,13 +21,13 @@ class Point(object):
 
 
 class Music(object):
-    def __init__(self, id, list_of_tags):
-        self.id = id
+    def __init__(self, mid, list_of_tags):
+        self.mid = mid
         self.list_of_tags = list_of_tags
         self.point = None
 
     def __repr__(self):
-        return self.id
+        return self.mid
 
     def set_point(self, list_of_all_tags):
         self.point = Point()
@@ -53,43 +54,30 @@ def get_set_of_tags_from_file(file_name):
     return tags
 
 
-class CustomThread(Thread):
-    def __init__(self, queue):
-        Thread.__init__(self)
-        self.queue = queue
-
-    def set_clusters(self, clusters):
-        self.clusters = clusters
-        self.total_squared_distace = 0.0
-        self.best_matches = [[] for i in range(len(clusters))]
+class Worker(Process):
+    def __init__(self, tasks, results):
+        self.tasks = tasks
+        self.results = results
+        super(Worker, self).__init__()
 
     def run(self):
         while True:
-            music = self.queue.get()
+            music, clusters = self.tasks.get()
             best_match, best_match_distance = \
-                music.find_closest_centroid(self.clusters)
-            self.best_matches[best_match].append(music)
-            self.total_squared_distace += best_match_distance
-            self.queue.task_done()
-
-
-def calculate_total_squared_distance(clusters, best_matches, musics):
-    total_squared_distace = 0.0
-    for i, match in enumerate(best_matches):
-        for matched_music in match:
-            d = matched_music.point.euclidean_distance(clusters[i])
-            total_squared_distace += d
-    print 'Total distance:', total_squared_distace
+                music.find_closest_centroid(clusters)
+            self.tasks.task_done()
+            self.results.put((music, best_match, best_match_distance))
 
 
 if __name__ == '__main__':
-    queue = Queue()
-    threads = []
+    tasks = JoinableQueue()
+    results = Queue()
+    workers = []
     for i in range(4):
-        t = CustomThread(queue)
-        t.setDaemon(True)
-        t.start()
-        threads.append(t)
+        w = Worker(tasks, results)
+        # w.setDaemon(True)
+        w.start()
+        workers.append(w)
 
     file_name = 'data/lfm.dat'
     k = 5
@@ -115,19 +103,20 @@ if __name__ == '__main__':
         total_squared_distace = 0.0
         best_matches = [[] for i in range(k)]
 
-        for t in threads:
-            t.set_clusters(clusters)
-
         for music in musics:
-            queue.put(music)
+            tasks.put((music, clusters))
 
-        queue.join()
+        tasks.join()
+        print 'finished joining'
 
-        for t in threads:
-            new_best_matches = [i1 + i2 for i1, i2 in zip(best_matches, t.best_matches)]
-            best_matches = new_best_matches
-            total_squared_distace += t.total_squared_distace
-        best_matches = map(sorted, best_matches)
+        num_musics = len(musics)
+        while num_musics:
+            music, best_match, best_match_distance = results.get()
+            best_matches[best_match].append(music)
+            total_squared_distace += best_match_distance
+            num_musics -= 1
+
+        map(lambda x: x.sort(key=lambda y: y.mid), best_matches)
 
         for i, match in enumerate(best_matches):
             print i, len(match)
@@ -135,7 +124,6 @@ if __name__ == '__main__':
         print 'Total distance:', total_squared_distace
         print '-----'
 
-        # if the results are the same as last time, this is complete
         if best_matches == last_matches:
             break
         last_matches = best_matches
@@ -151,3 +139,5 @@ if __name__ == '__main__':
             clusters[i] = Point(averages)
 
         iteration += 1
+
+    map(lambda w: w.terminate(), workers)
