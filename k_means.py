@@ -16,10 +16,10 @@ class Point(object):
 
 
 class Music(object):
-    def __init__(self, mid, list_of_tags):
+    def __init__(self, mid, list_of_tags, list_of_all_tags):
         self.mid = mid
         self.list_of_tags = list_of_tags
-        self.point = None
+        self.set_point(list_of_all_tags)
 
     def __repr__(self):
         return self.mid
@@ -28,10 +28,10 @@ class Music(object):
         self.point = Point()
         self.point.set_associated_vector(list_of_all_tags, self.list_of_tags)
 
-    def find_closest_centroid(self, clusters):
+    def find_closest_centroid(self, centroids):
         best_match = -1
         best_match_distance = float("inf")
-        for i, cluster in enumerate(clusters):
+        for i, cluster in enumerate(centroids):
             d = self.point.euclidean_distance(cluster)
             if d < best_match_distance:
                 best_match = i
@@ -49,23 +49,40 @@ def get_set_of_tags_from_file(file_name):
     return tags
 
 
+def get_musics_from_file(file_name, list_of_all_tags):
+    musics = []
+    for line in get_content_from_file(file_name):
+        list_from_line = line.strip().split()
+        music = Music(list_from_line[0], list_from_line[1:], list_of_all_tags)
+        musics.append(music)
+    return musics
+
+
+def update_centroids(centroids, total_of_tags):
+    '''calculate the new means to be the centroid of the observations in the
+    cluster
+    '''
+    for i in range(len(centroids)):
+        averages = [0.0] * total_of_tags
+        if len(best_matches[i]) > 0:
+            list_of_points = [music.point.vector for music in best_matches[i]]
+            sum_of_points = [sum(value) for value in zip(*list_of_points)]
+            averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
+        centroids[i] = Point(averages)
+
+
 if __name__ == '__main__':
     file_name = 'data/lfm_short.dat'
     k = 5
-    musics = []
+
     tags = get_set_of_tags_from_file(file_name)
     list_of_all_tags = sorted(tags)
+    musics = get_musics_from_file(file_name, list_of_all_tags)
 
     print 'Numbers of tags:', len(list_of_all_tags)
 
-    for line in get_content_from_file(file_name):
-        list_from_line = line.strip().split()
-        music = Music(list_from_line[0], list_from_line[1:])
-        music.set_point(list_of_all_tags)
-        musics.append(music)
-
-    rand_bin_list = lambda n: [random() for b in range(1, n + 1)]
-    clusters = [Point(rand_bin_list(len(list_of_all_tags))) for i in range(k)]
+    rand_list = lambda n: [random() for b in range(1, n + 1)]
+    centroids = [Point(rand_list(len(list_of_all_tags))) for i in range(k)]
 
     last_matches = None
     iteration = 1
@@ -77,7 +94,7 @@ if __name__ == '__main__':
         # find which centroid is the closest for each music
         for music in musics:
             best_match, best_match_distance = \
-                music.find_closest_centroid(clusters)
+                music.find_closest_centroid(centroids)
             best_matches[best_match].append(music)
             total_squared_distace += best_match_distance
 
@@ -93,11 +110,6 @@ if __name__ == '__main__':
 
         # move the centroids to the average of their members
         print 'Moving the centroids'
-        for i in range(k):
-            averages = [0.0] * len(list_of_all_tags)
-            if len(best_matches[i]) > 0:
-                list_of_points = [music.point.vector for music in best_matches[i]]
-                sum_of_points = [sum(value) for value in zip(*list_of_points)]
-                averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
-            clusters[i] = Point(averages)
+        update_centroids(centroids, len(list_of_all_tags))
+
         iteration += 1
