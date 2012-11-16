@@ -6,8 +6,6 @@ from multiprocessing import Process, JoinableQueue, Queue
 
 
 class Point(object):
-    # maybe leave the constructor empty and create a method for building the
-    # vector from base and instace lists
     def __init__(self, vector=None):
         self.vector = vector
 
@@ -78,7 +76,7 @@ if __name__ == '__main__':
         w.start()
         workers.append(w)
 
-    file_name = 'data/lfm_short.dat'
+    file_name = 'data/lfm.dat'
     k = 5
     musics = []
     tags = get_set_of_tags_from_file(file_name)
