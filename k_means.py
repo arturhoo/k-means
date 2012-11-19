@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from utils import get_content_from_file
+from utils import get_content_from_file, parse_arguments
 from random import random, sample, randint
 from scipy import spatial
 from numpy import array, mean
+from optparse import OptionParser
+from sys import exit
 
 
 class Point(object):
@@ -92,9 +94,21 @@ def random_partition(musics, k):
     return centroids
 
 
+def get_centroids_from_file(musics, k, file_name):
+    centroids = []
+    for line in get_content_from_file(file_name):
+        centroids.append(Point(musics[int(line)].point.vector))
+    if len(centroids) != k:
+        exit('Specified K differs from number of cluster in file')
+    return centroids
+
+
 if __name__ == '__main__':
-    file_name = 'data/lfm_short.dat'
-    k = 8
+    usage_text = 'Usage: %prog -i input_file -k num_of_clusters [-c centroids_file]'
+    parser = OptionParser(usage=usage_text)
+    (options, args) = parse_arguments(parser)
+    file_name = options.input
+    k = options.k
 
     tags = get_set_of_tags_from_file(file_name)
     list_of_all_tags = sorted(tags)
@@ -102,9 +116,12 @@ if __name__ == '__main__':
 
     print 'Numbers of tags:', len(list_of_all_tags)
 
-    # centroids = random_centroids(k)
-    # centroids = forgy_initialization(musics, k)
-    centroids = random_partition(musics, k)
+    if options.centroids_file:
+        centroids = get_centroids_from_file(musics, k, options.centroids_file)
+    else:
+        # centroids = random_centroids(k)
+        # centroids = forgy_initialization(musics, k)
+        centroids = random_partition(musics, k)
 
     last_matches = None
     iteration = 1

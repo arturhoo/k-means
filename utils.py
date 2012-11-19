@@ -14,3 +14,19 @@ def get_content_from_file(file_name):
         print 'Unexpected error: ', exc_info()[0]
         exit()
     return content
+
+
+def parse_arguments(parser):
+    '''parse the arguments provided in the command line'''
+    parser.add_option('-i', '--input', type='string', help='input file',
+                      dest='input')
+    parser.add_option('-k', '--k', type='int', help='number of clusters',
+                      dest='k')
+    parser.add_option('-c', '--centroids', type='string',
+                      help='centroids file', dest='centroids_file')
+    (options, args) = parser.parse_args()
+    if not options.input:
+        parser.error('Input filename not given')
+    if not options.k:
+        parser.error('Number of clusters K not given')
+    return(options, args)
