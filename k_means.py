@@ -119,6 +119,16 @@ def update_centroids(centroids, best_matches, total_of_tags=None):
         centroids[i] = Point(averages)
 
 
+def output(last_matches):
+    music_cluster_list = []
+    for idx, cluster in enumerate(last_matches):
+        for music in cluster:
+            music_cluster_list.append((music, idx))
+    music_cluster_list.sort()
+    for t in music_cluster_list:
+        print t[0], t[1]
+
+
 if __name__ == '__main__':
     usage_text = 'Usage: %prog -i input_file -k num_of_clusters [-c centroids_file]'
     parser = OptionParser(usage=usage_text)
