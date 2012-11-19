@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from utils import get_content_from_file
-from random import random
+from random import random, sample, randint
+from scipy import spatial
+from numpy import array, mean
 
 
 class Point(object):
     def __init__(self, vector=None):
-        self.vector = vector
+        self.vector = array(vector)
 
     def set_associated_vector(self, base_list, instance_list):
-        self.vector = [1 if item in instance_list else 0 for item in base_list]
+        self.vector = array([1 if item in instance_list else 0 for item in base_list])
 
     def euclidean_distance(self, point):
-        squares = [(x - y) ** 2 for x, y in zip(self.vector, point.vector)]
-        return sum(squares)
+        return spatial.distance.sqeuclidean(self.vector, point.vector)
 
 
 class Music(object):
@@ -58,22 +59,23 @@ def get_musics_from_file(file_name, list_of_all_tags):
     return musics
 
 
-def update_centroids(centroids, total_of_tags):
+def update_centroids(centroids, best_matches, total_of_tags=None):
     '''calculate the new means to be the centroid of the observations in the
     cluster
     '''
+    if total_of_tags is None:
+        total_of_tags = len(centroids[0].vector)
     for i in range(len(centroids)):
         averages = [0.0] * total_of_tags
         if len(best_matches[i]) > 0:
             list_of_points = [music.point.vector for music in best_matches[i]]
-            sum_of_points = [sum(value) for value in zip(*list_of_points)]
-            averages = [float(ssum) / float(len(list_of_points)) for ssum in sum_of_points]
+            averages = mean(list_of_points, axis=0)
         centroids[i] = Point(averages)
 
 
 if __name__ == '__main__':
     file_name = 'data/lfm_short.dat'
-    k = 5
+    k = 8
 
     tags = get_set_of_tags_from_file(file_name)
     list_of_all_tags = sorted(tags)
@@ -110,6 +112,6 @@ if __name__ == '__main__':
 
         # move the centroids to the average of their members
         print 'Moving the centroids'
-        update_centroids(centroids, len(list_of_all_tags))
+        update_centroids(centroids, best_matches)
 
         iteration += 1
