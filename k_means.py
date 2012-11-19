@@ -73,6 +73,25 @@ def update_centroids(centroids, best_matches, total_of_tags=None):
         centroids[i] = Point(averages)
 
 
+def random_centroids(k):
+    rand_list = lambda n: [random() for b in range(1, n + 1)]
+    return [Point(rand_list(len(list_of_all_tags))) for i in range(k)]
+
+
+def forgy_initialization(musics, k):
+    return [music.point for music in sample(musics, k)]
+
+
+def random_partition(musics, k):
+    total_of_tags = len(musics[0].point.vector)
+    centroids = [Point()] * k
+    best_matches = [[] for i in range(k)]
+    for music in musics:
+        best_matches[randint(0, k - 1)].append(music)
+    update_centroids(centroids, best_matches, total_of_tags)
+    return centroids
+
+
 if __name__ == '__main__':
     file_name = 'data/lfm_short.dat'
     k = 8
@@ -83,8 +102,9 @@ if __name__ == '__main__':
 
     print 'Numbers of tags:', len(list_of_all_tags)
 
-    rand_list = lambda n: [random() for b in range(1, n + 1)]
-    centroids = [Point(rand_list(len(list_of_all_tags))) for i in range(k)]
+    # centroids = random_centroids(k)
+    # centroids = forgy_initialization(musics, k)
+    centroids = random_partition(musics, k)
 
     last_matches = None
     iteration = 1
