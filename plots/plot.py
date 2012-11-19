@@ -3,7 +3,7 @@ from matplotlib import cm
 from matplotlib.mlab import griddata
 import numpy as np
 from matplotlib import pyplot as plt, rcParams, rc
-rc('font', **{'family': 'serif', 'serif': ['Times'], 'size': 11})
+rc('font', **{'family': 'serif', 'serif': ['Times'], 'size': 15})
 rcParams['text.usetex'] = True
 rcParams['text.latex.unicode'] = True
 colors = ['b', 'r', 'g', 'k', 'm', 'c', 'y']
@@ -40,5 +40,24 @@ def top_10_labels():
     plt.savefig('top_10_labels.pdf', bbox_inches='tight')
 
 
+def k_value():
+    K = range(2, 17)
+    kIdx = 5
+    avgWithinSS = [5326.032135, 3461.266885, 2563.416351, 2043.744647, 1698.784754, 1435.778412, 1247.495494, 1109.112444, 997.1862228, 892.6802995, 822.6883758, 757.8165924, 695.4745584, 656.0969991, 608.9624053]
+    fig = plt.figure(figsize=(9, 3.5))
+    # fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(K, avgWithinSS, 'k*-')
+    ax.plot(K[kIdx], avgWithinSS[kIdx], marker='o', markersize=12,
+        markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
+    ax.set_xlim(1, 17)
+    plt.grid(True)
+    plt.xlabel(u'Número de Agrupamentos ($K$)')
+    plt.ylabel(u'Soma média dos quadrados intra-agrupamentos')
+    # plt.title(u'"Elbow" para o agrupamento $k$-means')
+    plt.savefig('k_values.pdf', bbox_inches='tight')
+
+
 if __name__ == '__main__':
     top_10_labels()
+    k_value()
