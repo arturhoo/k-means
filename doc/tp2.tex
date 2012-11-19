@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{rotating}
 \usepackage{times,amsmath,epsfig}
+\usepackage{amssymb}
 \usepackage{url}
 \usepackage{multirow}
  \makeatletter
@@ -43,16 +44,30 @@
 
 \section{INTRODUÇÃO}
 
+Problemas de agrupamento podem surgir de diversas aplicações, como mineração de dados e aprendizado de máquina, compressão de dados e classificação e reconhecimento de padrões. A noção do que constitui um bom agrupamento depende diretamente da aplicação e existem muitas maneiras de achar esses agrupamentos de acordo com diversos critérios, sejam eles \textit{ad hoc} ou sistemáticos.
 
-\section{K-MEANS}
+
+\section{$K$-MEANS}
+
+Dentre as formulações de agrupamentos fundamentadas na minimização de uma função objetivo, talvez a mais amplamente utilizada e estudada seja o agrupamento \textit{k}-means. Dado um conjunto de \textit{n} pontos num espaço real \textit{d}-dimensional, $\mathbb{R}^{d}$, e um inteiro $k$, o problema é determinar um conjunto de $k$ pontos em $\mathbb{R}^{d}$, denominados centros, para minimizar a distância total quadrada de cada ponto para seu centro mais próximo. Esse tipo de agrupamento é enquadrado na categoria geral de agrupamentos baseados em variância \cite{Inaba:1994:AWV:177424.178042, Inaba:1996:ERR:237218.237406}.
+
+Agrupamento baseada no $k$-means está relacionada com uma séria de outras técnicas de agrupamentos e problemas de localização, incluiindo o \textit{k-medians} Euclidiano, no qual o objetivo é minimizar a soma das distâncias para o centro mais próximo, e tambem o problema \textit{k-centers}, onde o objetivo é minimizar a distância máxima de todos os pontos para o centro mais próximo.
+
+Não existe solução eficiente para nenhum desses problemas e algumas formulações são NP-hard \cite{Garey:1979:CIG:578533}. Uma das heurísticas mais populares para a solução do $k$-means é baseada em um simples esquema iterativo que nusca solução mínimas locais. Esse algortimo é geralmente chamado de \textit{algoritmo k-means} \cite{Forgy65, MacQueen67}, e especificamente nesse trabalho é utilizada a versão conhecida como \textit{Algoritmo de Lloyd} \cite{Lloyd82leastsquares}.
+
+O algoritmo de Lloyd é baseado na simples observação de que o posicionamento ótimo de um centro é no centróide do agrupamento associado. Dado um conjunto de $k$ centros $Z$, para cada centro $z \in Z$, seja $V(z)$ o conjunto de pontos onde $z$ é o vizinho mais próximo. Em termos geométricos, $V(z)$ é o conjunto de pontos sobre a célula de Voronoi de $z$ \cite{Preparata:1985:CGI:4333}. Cada estágio do algoritmo de LLoyd move cada ponto central $z$ para o centróide de $V(z)$ e depois atualiza $V(z)$ ao recomputar a distância de cada ponto para o seu centro mais próximo. Esses passos são repetidos até que uma condição de convergência seja atingida. Em geral, especialmente se nenhum ponto é equidistante de dois centro, o algoritmo irá eventualmente convergir para um ponto que é um mínimo local para a distorção. Nesse trabalho a condição de parada é satisfeita quando $V(z)$ para cada ponto central $z$ não se altera após um novo estágio de atualização.
 
 
 \subsection{Complexidade}
 
+Em termos de complexidade temporal, podemos dizer que a maior parte do tempo é gasta na computação das distâncias entre as observações e os centros. Essa operação tem custo $O(M)$, onde $M$ é a dimensão dos vetores. O passo de atualização computa $KN$ distâncias, dessa maneira, sua complexidade é $O(KNM)$. Para um número fixo de iterações $I$, a complexidade geral é $O(IKNM)$.
+
+Dessa maneira, o $k$-means é linear em todos os fatores relevantes: iterações, número de agrupamentos, número de observações e dimensionalidade do espaço. Em \cite{Inaba:1994:AWV:177424.178042} é mostrado que se a dimensionalidade $M$ e o número de agrupamentos $K$ são fixados, o problema pode ser resolvido em $O(N^{MK+1}\log N)$.
+
 
 \section{ESCOLHA DOS CENTRÓIDES INICIAIS}
 
-K random initial centroids
+K random initial centroids (a cada iteração ele tende a colocar um novo cluster)
 Forgy initialization - randomly chooses K observations from the data set
 Random Partition - randomly assign a cluster to each observation and then proceeds to the Update step
 
@@ -69,6 +84,14 @@ Com o intuito de se obter testes mais consistentes, os experimentos foram execut
 Todos os testes foram realizados 5 vezes e o resultado médio para o tempo de execução foi considerado. Finalmente, certificou-se que a solução desenvolvida execute perfeitamente na estação \verb+claro.grad.dcc.ufmg.br+.
 
 
+\subsection{Análise da Escolha dos Centróides Iniciais}
+
+
+\subsection{Análise do Valor de K}
+
+Joelho (distancia total quadrada media, jagota)
+
+
 \subsection{Análise do Tamanho da Entrada}
 
 
@@ -78,13 +101,14 @@ Todos os testes foram realizados 5 vezes e o resultado médio para o tempo de exe
 \subsection{Análise da Qualidade da Solução}
 
 Smallest total squared distance
+Jagota
 
 
 \section{CONCLUSÃO}
 
 
-% \nocite{*}
-% \bibliographystyle{sbc}
-% \bibliography{bib}
+\nocite{*}
+\bibliographystyle{sbc}
+\bibliography{bib}
 
 \end{document}
