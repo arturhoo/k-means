@@ -15,6 +15,9 @@ class Point(object):
         self.vector = array([1 if item in instance_list else 0 for item in base_list])
 
     def euclidean_distance(self, point):
+        return spatial.distance.euclidean(self.vector, point.vector)
+
+    def sqeuclidean_distance(self, point):
         return spatial.distance.sqeuclidean(self.vector, point.vector)
 
 
@@ -35,7 +38,7 @@ class Music(object):
         best_match = -1
         best_match_distance = float("inf")
         for i, cluster in enumerate(centroids):
-            d = self.point.euclidean_distance(cluster)
+            d = self.point.sqeuclidean_distance(cluster)
             if d < best_match_distance:
                 best_match = i
                 best_match_distance = d
@@ -61,20 +64,6 @@ def get_musics_from_file(file_name, list_of_all_tags):
     return musics
 
 
-def update_centroids(centroids, best_matches, total_of_tags=None):
-    '''calculate the new means to be the centroid of the observations in the
-    cluster
-    '''
-    if total_of_tags is None:
-        total_of_tags = len(centroids[0].vector)
-    for i in range(len(centroids)):
-        averages = [0.0] * total_of_tags
-        if len(best_matches[i]) > 0:
-            list_of_points = [music.point.vector for music in best_matches[i]]
-            averages = mean(list_of_points, axis=0)
-        centroids[i] = Point(averages)
-
-
 def random_centroids(k):
     rand_list = lambda n: [random() for b in range(1, n + 1)]
     return [Point(rand_list(len(list_of_all_tags))) for i in range(k)]
@@ -97,10 +86,37 @@ def random_partition(musics, k):
 def get_centroids_from_file(musics, k, file_name):
     centroids = []
     for line in get_content_from_file(file_name):
-        centroids.append(Point(musics[int(line)].point.vector))
+        try:
+            centroids.append(Point(musics[int(line)].point.vector))
+        except IndexError:
+            exit('Specified observation ID doesn\'t exist')
     if len(centroids) != k:
         exit('Specified K differs from number of cluster in file')
     return centroids
+
+
+def jagota_metric(last_matches, centroids, musics):
+    jagota = 0.0
+    for idx, centroid in enumerate(centroids):
+        distance = 0.0
+        for music in last_matches[idx]:
+            distance += centroid.euclidean_distance(music.point)
+        jagota += distance * (1.0 / len(last_matches[idx]))
+    return jagota
+
+
+def update_centroids(centroids, best_matches, total_of_tags=None):
+    '''calculate the new means to be the centroid of the observations in the
+    cluster
+    '''
+    if total_of_tags is None:
+        total_of_tags = len(centroids[0].vector)
+    for i in range(len(centroids)):
+        averages = [0.0] * total_of_tags
+        if len(best_matches[i]) > 0:
+            list_of_points = [music.point.vector for music in best_matches[i]]
+            averages = mean(list_of_points, axis=0)
+        centroids[i] = Point(averages)
 
 
 if __name__ == '__main__':
@@ -152,3 +168,5 @@ if __name__ == '__main__':
         update_centroids(centroids, best_matches)
 
         iteration += 1
+
+    print 'Jagota:', jagota_metric(last_matches, centroids, musics)
