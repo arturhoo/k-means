@@ -67,21 +67,64 @@ Dessa maneira, o $k$-means é linear em todos os fatores relevantes: iterações, n
 
 \section{ESCOLHA DOS CENTRÓIDES INICIAIS}
 
-K random initial centroids (a cada iteração ele tende a colocar um novo cluster)
-Forgy initialization - randomly chooses K observations from the data set
-Random Partition - randomly assign a cluster to each observation and then proceeds to the Update step
+Pode-se argumentar que o algoritmo $k$-means define um mapeamento determinístico a partir de um ponto inicial até a solução. Isso significa que o ótimo local encontrado como solução é sensível a escolha inicial dos agrupamentos. Arranjos completamente diferentes para a solução final podem surgir a partir de pequenas alterações na escolha incial. De acordo com \cite{DudaHartCV} (p. 228):
+
+\hyphenation{start-ing}
+\begin{quote}
+    ``One question that plagues all hill-climbing procedures is the choice of the starting point. Unfortunately, there is no simple, universally good solution to this problem.''
+\end{quote}
+
+``Repetição com diferentes escolhas aleatórias'' \cite{DudaHartCV} é geralmente a estratégia mais utilizada. Nesse trabalho, foram avaliadas três diferentes maneiras de se escolher aleatoriamente os $k$ pontos iniciais para serem centros dos agrupamentos. Além disso, foi implementada uma maneira de se utilizar $k$ observações definidas pelo usuário como centróides iniciais.
+
+\subsection{$k$ vetores aleatórios}
+
+Como será apresentado na seção seguinte, cada uma das observações e consequentemente também cada um dos centróides é definido como um ponto em $[0, 1]^{M}$.
+
+Assim, essa maneira de inicialização simplesmente define um valor real aleatório no intervalo $[0, 1]$ para cada uma das $M$ dimensões, para cada um dos vetores. Um exemplo de vetor gerado para $M = 5$ é apresentado abaixo:
+
+\begin{align*}
+    v = [0.43, 0.11, 0.78, 0.91, 0.32]
+\end{align*}
+
+
+\subsection{Inicialização de Forgy}
+
+Nesse método, apresentado em \cite{Forgy65}, são escolhidas $k$ observações aleatórias para serem os os pontos centrais iniciais.
+
+\subsection{Partições aleatórias}
+
+Essa alternativa assinala um agrupamento aleatório para cada uma das observações e em seguida procede para o passo de atualização do algoritmo $k$-means, obtendo pontos médios que serão utilizados como centróides iniciais.
 
 
 \section{BASE DE DADOS}
+
+A base de dados utilizada foi fornecida pela comissão avaliadora, onde cada observação é uma música identificada por um número, seguida de rótulos que foram associados a ela por usuários do sistema de onde foi extraída. Um exemplo de entrada é exibido abaixo:
+
+\begin{center}
+\verb|14 jazz music chillout futuristica electronic hip-hop|
+\end{center}
+
+Para a modelagem do problema foi efetuado o que é conhecido por desnormalização, onde cada um dos rótulos existentes na base de dados é representado por uma dimensão. No caso da base fornecida, existem $3869$ rótulos distintos, implicando no mapeamento do problema para $M = 3869$ dimensões.
+
+Como consequência dessa modelagem, os pontos que representam cada uma das observações são vetores com alto grau de esparsidade: as posições que representam rótulos da observação assumem valor $1$ e as demais $0$.
+
+A figure \ref{top_10_labels} exibe os 10 rótulos mais frequentes.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../plots/top_10_labels.pdf}
+    \caption{Os 10 rótulos mais frequentes}
+    \label{top_10_labels}
+\end{figure}
 
 
 \section{AVALIAÇÃO EXPERIMENTAL}
 
 \subsection{Procedimentos}
 
-Com o intuito de se obter testes mais consistentes, os experimentos foram executados em ambiente virtualizado, com capacidade de processamento e memória primária reduzidas, 50\% da capacidade da máquina hospedeira e 1024MiB, respectivamente. O sistema operacional do ambiente virtualizado era Ubuntu Server 12.04 64 bits e os softwares utilizados foram interpretador Python (2.7.2) PyPy versão 1.9.0, e GCC versão 4.2.1. A máquina hospedeira possuía sistema operacional Mac OS X 10.8.2, processador \textit{quad-core} de 2.3GHz e memória primária com capacidade de 16GiB.
+Com o intuito de se obter testes mais consistentes, os experimentos foram executados em ambiente virtualizado, com capacidade de processamento e memória primária reduzidas, 50\% da capacidade da máquina hospedeira e 1024MiB, respectivamente. O sistema operacional do ambiente virtualizado era Ubuntu Server 12.04 64 bits e os softwares utilizados foram interpretador Python (2.7.2) e GCC versão 4.2.1. A máquina hospedeira possuía sistema operacional Mac OS X 10.8.2, processador \textit{quad-core} de 2.3GHz e memória primária com capacidade de 16GiB.
 
-Todos os testes foram realizados 5 vezes e o resultado médio para o tempo de execução foi considerado. Finalmente, certificou-se que a solução desenvolvida execute perfeitamente na estação \verb+claro.grad.dcc.ufmg.br+.
+Todos os testes foram realizados 3 vezes e o resultados médios para os valores aferidos foram considerados. Finalmente, certificou-se que a solução desenvolvida execute perfeitamente na estação \verb+claro.grad.dcc.ufmg.br+.
 
 
 \subsection{Análise da Escolha dos Centróides Iniciais}
