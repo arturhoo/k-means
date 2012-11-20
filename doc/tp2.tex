@@ -47,20 +47,37 @@
 
 Problemas de agrupamento podem surgir de diversas aplicações, como mineração de dados e aprendizado de máquina, compressão de dados e classificação e reconhecimento de padrões. A noção do que constitui um bom agrupamento depende diretamente da aplicação e existem muitas maneiras de achar esses agrupamentos de acordo com diversos critérios, sejam eles \textit{ad hoc} ou sistemáticos.
 
+As técnicas de agrupamento surgem quando não se possui classes para serem preditas mas as observações devem ser separadas em grupos naturais. Esses grupos presumivelmente refletem um mecanismo que está em funcionamento que faz com que algumas instâncias possuam um grau de semelhança maior com certos elementos que com outros.
+
+Os resultados de um agrupamento podem ser expressos de diversas maneiras. Os grupos que são identificados podem ser exclusivos: uma dada observação pertence a somente um grupo. Ou eles pode haver sobreposição: uma observação pode pertencer a diversos grupos. Ou eles podem ser probabilísticos: uma observação pertence a cada grupo com uma certa probabilidade. Ou eles podem ser hierárquicos: uma divisão grosseira das observações em grupos no nível superior e cada grupo sendo refinado posteriormente - talvez até o nível de observações individuais. Na realidade, a escolha entre essas possibilidades deve ser ditada pela natureza dos mecanismos que se acredita definirem o fenômeno do agrupamento. Todavia, como esses mecanismos são raramente conhecidos - a própria existência dos agrupamentos é, afinal de contas, algo que tentamos descobrir - e também por razões pragmáticas, a escolha é na maioria das vezes ditada pelas ferramentas disponíveis \cite{Witten:2011}.
+
+Nesse trabalho iremos examinar um algoritmo que trabalha em domínios numéricos, particionando as observações em grupos disjuntos. Faz parte do nosso trabalho um estudo cuidadoso sobre diferentes métodos de inicialização, avaliação exeperimental de valores para o número de grupos e análise de uma base de dados fornecida pela comissão avaliadora.
 
 \section{$K$-MEANS}
 
 Dentre as formulações de agrupamentos fundamentadas na minimização de uma função objetivo, talvez a mais amplamente utilizada e estudada seja o agrupamento \textit{k}-means. Dado um conjunto de \textit{n} pontos num espaço real \textit{d}-dimensional, $\mathbb{R}^{d}$, e um inteiro $k$, o problema é determinar um conjunto de $k$ pontos em $\mathbb{R}^{d}$, denominados centros, para minimizar a distância total quadrada de cada ponto para seu centro mais próximo. Esse tipo de agrupamento é enquadrado na categoria geral de agrupamentos baseados em variância \cite{Inaba:1994:AWV:177424.178042, Inaba:1996:ERR:237218.237406}.
 
-Agrupamento baseada no $k$-means está relacionada com uma séria de outras técnicas de agrupamentos e problemas de localização, incluiindo o \textit{k-medians} Euclidiano, no qual o objetivo é minimizar a soma das distâncias para o centro mais próximo, e tambem o problema \textit{k-centers}, onde o objetivo é minimizar a distância máxima de todos os pontos para o centro mais próximo.
+Agrupamento baseada no $k$-means está relacionada com uma séria de outras técnicas de agrupamentos e problemas de localização, incluindo o \textit{k-medians} Euclidiano, no qual o objetivo é minimizar a soma das distâncias para o centro mais próximo, e também o problema \textit{k-centers}, onde o objetivo é minimizar a distância máxima de todos os pontos para o centro mais próximo.
 
-Não existe solução eficiente para nenhum desses problemas e algumas formulações são NP-hard \cite{Garey:1979:CIG:578533}. Uma das heurísticas mais populares para a solução do $k$-means é baseada em um simples esquema iterativo que nusca solução mínimas locais. Esse algortimo é geralmente chamado de \textit{algoritmo k-means} \cite{Forgy65, MacQueen67}, e especificamente nesse trabalho é utilizada a versão conhecida como \textit{Algoritmo de Lloyd} \cite{Lloyd82leastsquares}.
+Não existe solução eficiente para nenhum desses problemas e algumas formulações são NP-hard \cite{Garey:1979:CIG:578533}. Uma das heurísticas mais populares para a solução do $k$-means é baseada em um simples esquema iterativo que nusca solução mínimas locais. Esse algoritmo é geralmente chamado de \textit{algoritmo k-means} \cite{Forgy65, MacQueen67}, e especificamente nesse trabalho é utilizada a versão conhecida como \textit{Algoritmo de Lloyd} \cite{Lloyd82leastsquares}.
 
-O algoritmo de Lloyd é baseado na simples observação de que o posicionamento ótimo de um centro é no centróide do agrupamento associado. Dado um conjunto de $k$ centros $Z$, para cada centro $z \in Z$, seja $V(z)$ o conjunto de pontos onde $z$ é o vizinho mais próximo. Em termos geométricos, $V(z)$ é o conjunto de pontos sobre a célula de Voronoi de $z$ \cite{Preparata:1985:CGI:4333}. Cada estágio do algoritmo de LLoyd move cada ponto central $z$ para o centróide de $V(z)$ e depois atualiza $V(z)$ ao recomputar a distância de cada ponto para o seu centro mais próximo. Esses passos são repetidos até que uma condição de convergência seja atingida. Em geral, especialmente se nenhum ponto é equidistante de dois centro, o algoritmo irá eventualmente convergir para um ponto que é um mínimo local para a distorção. Nesse trabalho a condição de parada é satisfeita quando $V(z)$ para cada ponto central $z$ não se altera após um novo estágio de atualização.
+O algoritmo de Lloyd é baseado na simples observação de que o posicionamento ótimo de um centro é no centroide do agrupamento associado. Dado um conjunto de $k$ centros $Z$, para cada centro $z \in Z$, seja $V(z)$ o conjunto de pontos onde $z$ é o vizinho mais próximo. Em termos geométricos, $V(z)$ é o conjunto de pontos sobre a célula de Voronoi de $z$ \cite{Preparata:1985:CGI:4333}. Cada estágio do algoritmo de LLoyd move cada ponto central $z$ para o centroide de $V(z)$ e depois atualiza $V(z)$ ao reavaliar a distância de cada ponto para o seu centro mais próximo. Esses passos são repetidos até que uma condição de convergência seja atingida. Em geral, especialmente se nenhum ponto é equidistante de dois centro, o algoritmo irá eventualmente convergir para um ponto que é um mínimo local para a distorção. Nesse trabalho a condição de parada é satisfeita quando $V(z)$ para cada ponto central $z$ não se altera após um novo estágio de atualização.
+
+
+\subsection{Avaliação de Qualidade}
+
+Uma das maneiras mais diretas de se aferir a qualidade da solução encontrada é através da medida de Distância Quadrada Total, que mede a distância ao quadrado de cada observação até o centroide mais próximo. Uma outra medida, mais robusta, é o Índice de Jagota \cite{Jagota1991}, que avalia a tensão ou homogeneidade dos objetos dentro dos agrupamentos. Ela é definida como:
+
+\begin{align*}
+    Q = \sum_{i=1}^{k}{\frac{1}{\lvert C_i \rvert}}\sum_{x \in C_i}{d(x, \mu_i)}{}
+\end{align*}
+
+Nesse trabalho essa foi a maneira utilizada para se aferir a qualidade da solução. Em \cite{dunn74index} é apresentado o Índice de Dunn que define uma razão entra as distância mínima e máxima intra-agrupamentos. Já em \cite{Davies:1979:CSM:2053034.2053416} é formalizado o Índice de Davies-Bouldin, onde valores baixos indicam que os agrupamentos são compactos e seus centros afastados uns dos outros - consequentemente, o número de agrupamentos que minimiza esse índice é tomado como ótimo. Apesar de representarem boas alternativas para a avaliação de qualidade, ponderou-se que sua utilização foge do escopo do trabalho.
 
 
 \subsection{Complexidade}
 
+\label{complexidade}
 Em termos de complexidade temporal, podemos dizer que a maior parte do tempo é gasta na computação das distâncias entre as observações e os centros. Essa operação tem custo $O(M)$, onde $M$ é a dimensão dos vetores. O passo de atualização computa $KN$ distâncias, dessa maneira, sua complexidade é $O(KNM)$. Para um número fixo de iterações $I$, a complexidade geral é $O(IKNM)$.
 
 Dessa maneira, o $k$-means é linear em todos os fatores relevantes: iterações, número de agrupamentos, número de observações e dimensionalidade do espaço. Em \cite{Inaba:1994:AWV:177424.178042} é mostrado que se a dimensionalidade $M$ e o número de agrupamentos $K$ são fixados, o problema pode ser resolvido em $O(N^{MK+1}\log N)$.
@@ -69,18 +86,18 @@ Dessa maneira, o $k$-means é linear em todos os fatores relevantes: iterações, n
 \section{ESCOLHA DOS CENTRÓIDES INICIAIS}
 
 \label{initialization}
-Pode-se argumentar que o algoritmo $k$-means define um mapeamento determinístico a partir de um ponto inicial até a solução. Isso significa que o ótimo local encontrado como solução é sensível a escolha inicial dos agrupamentos. Arranjos completamente diferentes para a solução final podem surgir a partir de pequenas alterações na escolha incial. De acordo com \cite{DudaHartCV} (p. 228):
+Pode-se argumentar que o algoritmo $k$-means define um mapeamento determinístico a partir de um ponto inicial até a solução. Isso significa que o ótimo local encontrado como solução é sensível a escolha inicial dos agrupamentos. Arranjos completamente diferentes para a solução final podem surgir a partir de pequenas alterações na escolha inicial. De acordo com \cite{DudaHartCV} (p. 228):
 
 \hyphenation{start-ing}
 \begin{quote}
     ``One question that plagues all hill-climbing procedures is the choice of the starting point. Unfortunately, there is no simple, universally good solution to this problem.''
 \end{quote}
 
-``Repetição com diferentes escolhas aleatórias'' \cite{DudaHartCV} é geralmente a estratégia mais utilizada. Nesse trabalho, foram avaliadas três diferentes maneiras de se escolher aleatoriamente os $k$ pontos iniciais para serem centros dos agrupamentos. Além disso, foi implementada uma maneira de se utilizar $k$ observações definidas pelo usuário como centróides iniciais.
+``Repetição com diferentes escolhas aleatórias'' \cite{DudaHartCV} é geralmente a estratégia mais utilizada. Nesse trabalho, foram avaliadas três diferentes maneiras de se escolher aleatoriamente os $k$ pontos iniciais para serem centros dos agrupamentos. Além disso, foi implementada uma maneira de se utilizar $k$ observações definidas pelo usuário como centroides iniciais.
 
-\subsection{$k$ Centróides Aleatórios}
+\subsection{$k$ centroides Aleatórios}
 
-Como será apresentado na seção \ref{base}, cada uma das observações e consequentemente também cada um dos centróides é definido como um ponto em $[0, 1]^{M}$.
+Como será apresentado na seção \ref{base}, cada uma das observações e consequentemente também cada um dos centroides é definido como um ponto em $[0, 1]^{M}$.
 
 Assim, essa maneira de inicialização simplesmente define um valor real aleatório no intervalo $[0, 1]$ para cada uma das $M$ dimensões, para cada um dos vetores. Um exemplo de vetor gerado para $M = 5$ é apresentado abaixo:
 
@@ -95,7 +112,7 @@ Nesse método, apresentado em \cite{Forgy65}, são escolhidas $k$ observações alea
 
 \subsection{Partições Aleatórias}
 
-Essa alternativa assinala um agrupamento aleatório para cada uma das observações e em seguida procede para o passo de atualização do algoritmo $k$-means, obtendo pontos médios que serão utilizados como centróides iniciais.
+Essa alternativa assinala um agrupamento aleatório para cada uma das observações e em seguida procede para o passo de atualização do algoritmo $k$-means, obtendo pontos médios que serão utilizados como centroides iniciais.
 
 
 \section{BASE DE DADOS}
@@ -113,13 +130,21 @@ Como consequência dessa modelagem, os pontos que representam cada uma das observ
 
 A figure \ref{top_10_labels} exibe os 10 rótulos mais frequentes.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
     \centering
     \includegraphics[width=1.0\textwidth]{../plots/top_10_labels.pdf}
     \caption{Os 10 rótulos mais frequentes}
     \label{top_10_labels}
 \end{figure}
 
+A figura \ref{num_labels} mostra como o número de rótulos (que irá definir a dimensionalidade do problema) evolui com o crescimento da base de dados. É interessante notar que esse crescimento não respeita a Lei de Zipf, ao crescer linearmente.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../plots/num_labels.pdf}
+    \caption{Número de rótulos com o crescimento da base de dados}
+    \label{num_labels}
+\end{figure}
 
 \section{AVALIAÇÃO EXPERIMENTAL}
 
@@ -132,34 +157,34 @@ Todos os testes foram realizados 3 vezes e o resultados médios para os valores a
 
 \subsection{Análise dos Métodos de Inicialização}
 
-Como apresentado na seção \ref{initialization}, foram implementadas três maneiras de obter os centróides inciais. Cada uma dessas alternativas foi estudada, com valor de $k=50$, valor esse obtido através da regra de ouro $k \approx \sqrt{N/2}$ \cite{Mardia79}. A tabela \ref{tab:inicializacao} apresenta os resultados para essas execuções.
+Como apresentado na seção \ref{initialization}, foram implementadas três maneiras de obter os centroides iniciais. Cada uma dessas alternativas foi estudada, com valor de $k=50$, valor esse obtido através da regra de ouro $k \approx \sqrt{N/2}$ \cite{Mardia79}. A tabela \ref{tab:inicializacao} apresenta os resultados para essas execuções.
 
 % Table generated by Excel2LaTeX from sheet 'Sheet1'
 \begin{table}[htbp]
   \centering
     \begin{tabular}{p{2.4cm}|r|r|>{\raggedleft}p{2.5cm}|r}
         \toprule
-        \textbf{Medidas} & \multicolumn{1}{c|}{\textbf{Valores}} & \multicolumn{1}{c|}{\textbf{Centróids Aleat.}} & \multicolumn{1}{c|}{\textbf{Forgy}} & \multicolumn{1}{c}{\textbf{Partições Aleat.}} \tabularnewline
+        \textbf{Medidas} & \multicolumn{1}{c|}{\textbf{Valores}} & \multicolumn{1}{c|}{\textbf{centroides Aleat.}} & \multicolumn{1}{c|}{\textbf{Forgy}} & \multicolumn{1}{c}{\textbf{Partições Aleat.}} \tabularnewline
         \midrule
         \multirow{4}[4]{*}{\textbf{Iterações}} & Exec. 1 & 57    & 13    & 19 \tabularnewline
               & Exec. 2 & 56    & 14    & 15 \tabularnewline
               & Exec. 3 & 61    & 17    & 22 \tabularnewline
-              & \textbf{Média} & \textbf{58,00} & \textbf{14,67} & \textbf{18,67} \tabularnewline
+              & \textbf{Média} & \textbf{58.00} & \textbf{14.67} & \textbf{18.67} \tabularnewline
         \hline
-        \multirow{4}[4]{*}{\textbf{\vbox{Distância Quadrada Total}}} & Exec. 1 & 17903,03 & 17789,62 & 16923,46 \tabularnewline
-              & Exec. 2 & 17989,05 & 17682,62 & 16926,98 \tabularnewline
-              & Exec. 3 & 17793,68 & 17745,91 & 16906,91 \tabularnewline
-              & \textbf{Média} & \textbf{17895,25} & \textbf{17739,38} & \textbf{16919,11} \tabularnewline
+        \multirow{4}[4]{*}{\textbf{\vbox{Distância Quadrada Total}}} & Exec. 1 & 17903.03 & 17789.62 & 16923.46 \tabularnewline
+              & Exec. 2 & 17989.05 & 17682.62 & 16926.98 \tabularnewline
+              & Exec. 3 & 17793.68 & 17745.91 & 16906.91 \tabularnewline
+              & \textbf{Média} & \textbf{17895.25} & \textbf{17739.38} & \textbf{16919.11} \tabularnewline
         \hline
-        \multirow{4}[4]{*}{\textbf{Índice Jagota}} & Exec. 1 & 90,46 & 72,62 & 88,39 \tabularnewline
-              & Exec. 2 & 89,77 & 63,91 & 87,20 \tabularnewline
-              & Exec. 3 & 88,60 & 74,97 & 87,94 \tabularnewline
-              & \textbf{Média} & \textbf{89,61} & \textbf{70,50} & \textbf{87,84} \tabularnewline
+        \multirow{4}[4]{*}{\textbf{Índice Jagota}} & Exec. 1 & 90.46 & 72.62 & 88.39 \tabularnewline
+              & Exec. 2 & 89.77 & 63.91 & 87.20 \tabularnewline
+              & Exec. 3 & 88.60 & 74.97 & 87.94 \tabularnewline
+              & \textbf{Média} & \textbf{89.61} & \textbf{70.50} & \textbf{87.84} \tabularnewline
         \hline
-        \multirow{4}[3]{*}{\textbf{Tempo}} & Exec. 1 & 721,09 & 164,63 & 249,11 \tabularnewline
-              & Exec. 2 & 721,42 & 177,61 & 192,54 \tabularnewline
-              & Exec. 3 & 796,81 & 219,69 & 291,86 \tabularnewline
-              & \textbf{Média} & \textbf{746,44} & \textbf{187,31} & \textbf{244,50} \tabularnewline
+        \multirow{4}[3]{*}{\textbf{Tempo (s)}} & Exec. 1 & 721.09 & 164.63 & 249.11 \tabularnewline
+              & Exec. 2 & 721.42 & 177.61 & 192.54 \tabularnewline
+              & Exec. 3 & 796.81 & 219.69 & 291.86 \tabularnewline
+              & \textbf{Média} & \textbf{746.44} & \textbf{187.31} & \textbf{244.50} \tabularnewline
         \bottomrule
     \end{tabular}%
   \caption{Comparação dos Métodos de Inicialização}
@@ -168,12 +193,22 @@ Como apresentado na seção \ref{initialization}, foram implementadas três maneira
 
 Percebe-se que o método de Inicialização de Forgy produz os agrupamentos com os melhores índices de Jagota, através de menos iterações e consequentemente em menos tempo. Observa-se ainda que o método Partições Aleatórias, apesar de não produzir um valor para o índice de Jagota tão bom quanto o de Forgy, produz os agrupamentos com a menor distância quadrada total.
 
+As avaliações seguintes utilizaram o método de inicialização de Forgy.
+
 
 \subsection{Análise do Valor de K}
 
-Joelho (distancia total quadrada media, jagota)
+Para a análise do número de agrupamentos ($K$), utilizou-se um método conhecido como \textit{Elbow Method}, creditado a \cite{Thorndike53}:
 
-\begin{figure}[h!]
+\begin{quote}
+    Esse método ``utiliza o percentual de variância explicada como função do número de agrupamentos: deve ser escolhido um número de agrupamentos de maneira que a adição de outro grupo não implique numa melhora significativa na modelagem dos dados.''
+\end{quote}
+
+Em termos práticos, a mesma análise pode ser feita através da avaliação da variação da soma média dos quadrados intra-agrupamentos, ou seja, a média da soma das distâncias de cada observação ao centroide mais próximo (ou \textit{within sum of squares}), quando se aumento o número de agrupamentos.
+
+A figura \ref{k_values} mostra exatamente esse ponto, onde $k = 7$. Esse tipo de avaliação pode ser melhor realizada se levado em conta o Princípio da Descrição com Comprimento Mínimo (ou \textit{Minimum Description Length Principle}), que determina que a melhor teoria para um corpo de dados é aquele que minimiza o tamanho da teoria somado à quantidade de informação necessária para especificar as exceções a teoria \cite{Witten:2011}. Esse tipo de estudo foge do escopo desse trabalho.
+
+\begin{figure}[ht!]
     \centering
     \includegraphics[width=1.0\textwidth]{../plots/k_values.pdf}
     \caption{``Elbow'' para o estudo dos valores de $k$}
@@ -183,14 +218,38 @@ Joelho (distancia total quadrada media, jagota)
 
 \subsection{Análise do Tamanho da Entrada}
 
+Para essa avaliação experimental, variou-se o tamanho da entrada, utilizando-se somente as $X$ primeiras observações da base de dados disponibilizada, e foi aferido o tempo de execução, em caráter excepcional, para 10 execuções. O valor médio foi considerado e o desvio padrão amostral podem ser apreciados na figura \ref{time}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../plots/time.pdf}
+    \caption{Tempo de execução em função do tamanho da entrada}
+    \label{time}
+\end{figure}
+
+Nota-se que o experimento não foi de encontro com a análise de complexidade discutida na seção \ref{complexidade}. De acordo com a tabela \ref{num_labels}, a dimensão dos pontos que estão sendo representados cresce linearmente com o crescimento da base de dados. É esperado portanto, que o tempo de execução cresca de maneira quadrática com o aumento da base, o que não ocorre.
+
+Avalia-se que esse comportamento se deve ao fato da inicialização dos centroides ser feita de maneira aleatória, o que influência consideravelmente, tanto na taxa de convergência, quanto na qualidade da solução encontrada. Alternativas que forneceriam resultados mais palpáveis, mas menos realistas, envolvem a utilização de uma mesma semente para a seleção dos centroides iniciais, ou o estabelecimento de um número de iterações comum para todas as execuções.
+
 
 \subsection{Análise da Qualidade da Solução}
 
-Smallest total squared distance
-Jagota
+A análise da qualidade da solução de certa forma já foi feita nas seções anteriores, como apresentado na tabela \ref{tab:inicializacao} e na figura \ref{k_values}. Adicionalmente, a figura \ref{evolution} apresenta como as medidas Distância Total Quadrada e índice de Jagota se comportam com a evolução da execução do algoritmo.
 
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../plots/evolution.pdf}
+    \caption{Evolução das medidas de qualidade com a execução do algoritmo}
+    \label{evolution}
+\end{figure}
+
+É interessante notar que após a iteração 7 os valores para esses índices pouco mudam, uma característica forte da convergência do algoritmo.
 
 \section{CONCLUSÃO}
+
+Nesse trabalho, foi feito um estudo sobre o algoritmo de agrupamento $k$-means. Foram avaliadas três alternativas de inicialização para os centroides, onde se identificou que o método de Forgy é a melhor alternativa. Além disso, foram expostas algumas métricas de avaliação de qualidade dos agrupamentos gerados, com um enfoque sobre o Índice de Jagota. Finalmente, foi feita uma análise para a variação do número de agrupamentos através do \textit{Elbow Method}.
+
+O trabalho atende os objetivos propostos ao promover um estudo mais cuidadoso sobre a técnica, além de exigir o auxílio à literatura, e como consequência, a familiarização com a tarefa de agrupar itens.
 
 
 \nocite{*}
