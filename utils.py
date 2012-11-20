@@ -24,6 +24,8 @@ def parse_arguments(parser):
                       dest='k')
     parser.add_option('-c', '--centroids', type='string',
                       help='centroids file', dest='centroids_file')
+    parser.add_option('-d', '--debug', action='store_true',
+                      help='debug info', dest='debug')
     (options, args) = parser.parse_args()
     if not options.input:
         parser.error('Input filename not given')

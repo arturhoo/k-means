@@ -105,6 +105,16 @@ def jagota_metric(last_matches, centroids, musics):
     return jagota
 
 
+def average_within_sum_of_squares(last_matches, centroids, musics):
+    wss = []
+    for idx, centroid in enumerate(centroids):
+        distance = 0.0
+        for music in last_matches[idx]:
+            distance += centroid.euclidean_distance(music.point)
+        wss.append(distance)
+    return mean(wss)
+
+
 def update_centroids(centroids, best_matches, total_of_tags=None):
     '''calculate the new means to be the centroid of the observations in the
     cluster
@@ -140,43 +150,45 @@ if __name__ == '__main__':
     list_of_all_tags = sorted(tags)
     musics = get_musics_from_file(file_name, list_of_all_tags)
 
-    print 'Numbers of tags:', len(list_of_all_tags)
+    if options.debug:
+        print 'Numbers of tags:', len(list_of_all_tags)
 
     if options.centroids_file:
         centroids = get_centroids_from_file(musics, k, options.centroids_file)
     else:
         # centroids = random_centroids(k)
-        # centroids = forgy_initialization(musics, k)
-        centroids = random_partition(musics, k)
+        centroids = forgy_initialization(musics, k)
+        # centroids = random_partition(musics, k)
 
     last_matches = None
     iteration = 1
     while True:
-        print 'Iteration', iteration
         total_squared_distace = 0.0
         best_matches = [[] for i in range(k)]
 
-        # find which centroid is the closest for each music
+        # Find which centroid is the closest for each music
         for music in musics:
             best_match, best_match_distance = \
                 music.find_closest_centroid(centroids)
             best_matches[best_match].append(music)
             total_squared_distace += best_match_distance
 
-        for i, match in enumerate(best_matches):
-            print i, len(match)
-        print 'Total distance:', total_squared_distace
-        print '-----'
-
-        # if the results are the same as last time, this is complete
+        # If the results are the same as last time, this is complete
         if best_matches == last_matches:
             break
         last_matches = best_matches
 
+        if options.debug:
+            print 'Iteration', iteration
+            for i, match in enumerate(best_matches):
+                print i, len(match)
+            print 'Total Squared Distance:', total_squared_distace
+            print 'Jagota:', jagota_metric(last_matches, centroids, musics)
+            print '-----'
+
         # move the centroids to the average of their members
-        print 'Moving the centroids'
         update_centroids(centroids, best_matches)
 
         iteration += 1
-
-    print 'Jagota:', jagota_metric(last_matches, centroids, musics)
+    if not options.debug:
+        output(last_matches)
